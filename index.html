@@ -1,22 +1,27 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Puter AI Chatbot</title>
-  <link rel="stylesheet" href="style.css">
+  <title>AI Chat</title>
   <script src="https://js.puter.com/v2/"></script>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h1>AI Chatbot</h1>
+<div class="app">
+  <div class="sidebar">
+    <h2>Chat</h2>
+  </div>
 
-<div id="chat"></div>
+  <div class="main">
+    <div id="chat"></div>
 
-<div class="input-area">
-  <input id="userInput" placeholder="Type a message..." />
-  <button onclick="sendMessage()">Send</button>
+    <div class="input-area">
+      <input id="userInput" placeholder="Send a message..." />
+      <button onclick="sendMessage()">➤</button>
+    </div>
+  </div>
 </div>
 
 <script src="script.js"></script>
-
 </body>
 </html>
