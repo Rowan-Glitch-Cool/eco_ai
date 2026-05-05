@@ -1,36 +1,52 @@
 let messages = [
-  { role: "system", content: "You are a helpful chatbot. Be short and clear." }
+  { role: "system", content: "You are a helpful chatbot. Be concise." }
 ];
 
 async function sendMessage() {
   const input = document.getElementById("userInput");
   const chat = document.getElementById("chat");
 
-  const userText = input.value.trim();
-  if (!userText) return;
+  const text = input.value.trim();
+  if (!text) return;
 
-  // Display user message
-  chat.innerHTML += `<p class="user"><b>You:</b> ${userText}</p>`;
+  addMessage(text, "user");
   input.value = "";
 
-  messages.push({ role: "user", content: userText });
+  messages.push({ role: "user", content: text });
+
+  const loading = addMessage("...", "bot");
 
   try {
-    const response = await puter.ai.chat(messages);
+    const res = await puter.ai.chat(messages);
+    const reply = res.message.content;
 
-    const botReply = response.message.content;
+    messages.push(res.message);
 
-    messages.push(response.message);
+    loading.innerText = reply;
 
-    chat.innerHTML += `<p class="bot"><b>Bot:</b> ${botReply}</p>`;
-    chat.scrollTop = chat.scrollHeight;
-
-  } catch (err) {
-    chat.innerHTML += `<p class="bot"><b>Error:</b> ${err.message}</p>`;
+  } catch (e) {
+    loading.innerText = "Error: " + e.message;
   }
 }
 
-// Enter key support
-document.getElementById("userInput").addEventListener("keypress", function(e) {
+function addMessage(text, sender) {
+  const chat = document.getElementById("chat");
+
+  const div = document.createElement("div");
+  div.className = `message ${sender}`;
+
+  const bubble = document.createElement("div");
+  bubble.className = "bubble";
+  bubble.innerText = text;
+
+  div.appendChild(bubble);
+  chat.appendChild(div);
+
+  chat.scrollTop = chat.scrollHeight;
+
+  return bubble;
+}
+
+document.getElementById("userInput").addEventListener("keypress", e => {
   if (e.key === "Enter") sendMessage();
 });
