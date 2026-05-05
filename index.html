@@ -3,7 +3,75 @@
 <head>
   <title>AI Chat</title>
   <script src="https://js.puter.com/v2/"></script>
-  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #343541;
+      color: white;
+    }
+
+    .app {
+      display: flex;
+      height: 100vh;
+    }
+
+    .sidebar {
+      width: 220px;
+      background: #202123;
+      padding: 20px;
+    }
+
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #chat {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .message {
+      margin: 10px 0;
+      max-width: 700px;
+    }
+
+    .user { text-align: right; }
+    .bot { text-align: left; }
+
+    .bubble {
+      display: inline-block;
+      padding: 12px;
+      border-radius: 10px;
+    }
+
+    .user .bubble { background: #4CAF50; }
+    .bot .bubble { background: #444654; }
+
+    .input-area {
+      display: flex;
+      padding: 10px;
+      background: #40414f;
+    }
+
+    input {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 5px;
+    }
+
+    button {
+      margin-left: 10px;
+      padding: 12px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
 
@@ -16,12 +84,86 @@
     <div id="chat"></div>
 
     <div class="input-area">
-      <input id="userInput" placeholder="Send a message..." />
-      <button onclick="sendMessage()">➤</button>
+      <input id="input" placeholder="Send a message..." />
+      <button onclick="send()">➤</button>
     </div>
   </div>
 </div>
 
-<script src="script.js"></script>
+<script>
+let messages = [
+  { role: "system", content: "You are a helpful chatbot. Be short and clear." }
+];
+
+function addMessage(text, sender) {
+  const chat = document.getElementById("chat");
+
+  const div = document.createElement("div");
+  div.className = "message " + sender;
+
+  const bubble = document.createElement("div");
+  bubble.className = "bubble";
+  bubble.innerText = text;
+
+  div.appendChild(bubble);
+  chat.appendChild(div);
+
+  chat.scrollTop = chat.scrollHeight;
+
+  return bubble;
+}
+
+async function send() {
+  const input = document.getElementById("input");
+  const text = input.value.trim();
+  if (!text) return;
+
+  addMessage(text, "user");
+  input.value = "";
+
+  messages.push({ role: "user", content: text });
+
+  const loading = addMessage("...", "bot");
+
+  try {
+    const res = await puter.ai.chat({
+      messages: messages
+    });
+
+    // ✅ Handles BOTH possible formats
+    const reply =
+      res?.choices?.[0]?.message?.content ||
+      res?.message?.content ||
+      "No response";
+
+    messages.push({ role: "assistant", content: reply });
+
+    // typing effect
+    loading.innerText = "";
+    let i = 0;
+    const speed = 15;
+
+    function type() {
+      if (i < reply.length) {
+        loading.innerText += reply.charAt(i);
+        i++;
+        setTimeout(type, speed);
+      }
+    }
+
+    type();
+
+  } catch (e) {
+    console.error(e);
+    loading.innerText = "Error: " + e.message;
+  }
+}
+
+// Enter key
+document.getElementById("input").addEventListener("keypress", e => {
+  if (e.key === "Enter") send();
+});
+</script>
+
 </body>
 </html>
